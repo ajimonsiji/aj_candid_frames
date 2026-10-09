@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AJ Candid Frames | Scenic & Nature Photography</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+            handwriting: ['Caveat', 'cursive'],
+          },
+          colors: {
+            brand: {
+              50: '#f4f7f6',
+              100: '#e3ebe8',
+              500: '#2c5e53',
+              800: '#183832',
+              900: '#0d221e',
+              gold: '#d4af37',
+            }
+          },
+          animation: {
+            'ken-burns': 'kenburns 20s ease infinite alternate',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            kenburns: {
+              '0%': { transform: 'scale(1) translate(0, 0)' },
+              '100%': { transform: 'scale(1.15) translate(-1%, -1%)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom Styles for Framed Effects -->
+  <style>
+    /* Frame Styling Utilities */
+    .frame-gallery {
+      background: #ffffff;
+      padding: 18px;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.08), inset 0 0 12px rgba(0,0,0,0.06);
+      border-radius: 2px;
+    }
+
+    .frame-walnut {
+      background: #2d1e18;
+      border: 14px solid #3d2920;
+      outline: 2px solid #1a100c;
+      box-shadow: 0 25px 35px -10px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0,0,0,0.8);
+      padding: 16px;
+      border-radius: 4px;
+    }
+
+    .frame-charcoal {
+      background: #18181b;
+      border: 10px solid #27272a;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      border-radius: 6px;
+    }
+
+    .frame-polaroid {
+      background: #fcfbf9;
+      padding: 12px 12px 42px 12px;
+      box-shadow: 0 15px 25px -5px rgba(0,0,0,0.15), 0 0 5px rgba(0,0,0,0.05);
+      border-radius: 3px;
+      transform: rotate(var(--polaroid-angle, 0deg));
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .frame-polaroid:hover {
+      transform: scale(1.03) rotate(0deg) z-index(10);
+    }
+
+    .frame-glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      padding: 14px;
+      border-radius: 16px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Shimmer loader */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton-loading {
+      background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-full font-sans antialiased selection:bg-amber-500 selection:text-slate-950 transition-colors duration-700">
+
+  <!-- Dynamic Ambient Backlight Overlay -->
+  <div id="ambient-backdrop" class="fixed inset-0 pointer-events-none opacity-30 transition-all duration-1000 z-0 bg-gradient-to-br from-emerald-900 via-slate-950 to-amber-950"></div>
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-emerald-500 to-teal-400 p-0.5 shadow-lg shadow-amber-500/20">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <i class="fa-solid font-bold text-amber-400 fa-camera-retro text-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-serif text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-200 via-slate-100 to-emerald-200 bg-clip-text text-transparent">
+            AJ Candid Frames
+          </h1>
+          <p class="text-xs text-slate-400 tracking-wider uppercase font-mono">Nature & Scenic Collection</p>
+        </div>
+      </div>
+
+      <!-- Controls & Quick Actions -->
+      <div class="flex items-center space-x-2 sm:space-x-4">
+        
+        <!-- Live Drive Connection Status Badge -->
+        <button onclick="toggleDriveModal()" id="drive-status-btn" class="hidden sm:flex items-center space-x-2 text-xs font-medium px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="drive-status-text">Drive Connected</span>
+          <i class="fa-brands fa-google-drive text-sm ml-1"></i>
+        </button>
+
+        <!-- Ambient Audio Generator Toggle -->
+        <button id="audio-btn" onclick="toggleAmbientAudio()" title="Toggle Ambient Nature Soundscape" class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/80 text-slate-300 hover:text-amber-400 hover:border-amber-500/50 transition">
+          <i id="audio-icon" class="fa-solid fa-volume-xmark text-base"></i>
+        </button>
+
+        <!-- Slideshow Auto-Play Toggle -->
+        <button id="slideshow-btn" onclick="toggleSlideshowMode()" class="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-semibold text-xs sm:text-sm hover:from-amber-400 hover:to-amber-500 shadow-md shadow-amber-500/20 transition">
+          <i id="slideshow-icon" class="fa-solid fa-play"></i>
+          <span class="hidden md:inline">Zen Slideshow</span>
+        </button>
+
+        <!-- Drive Settings Modal Trigger -->
+        <button onclick="toggleDriveModal()" title="Drive API Settings" class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/80 text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Hero & Dynamic Filter Toolbar -->
+    <section class="mb-10 space-y-6">
+      
+      <!-- Welcome Banner / Subtitle -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-6">
+        <div>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20 mb-2">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-xs"></i> Live Google Drive Dynamic Gallery
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-serif font-semibold text-slate-100">
+            Unscripted Moments of Nature
+          </h2>
+          <p class="text-sm sm:text-base text-slate-400 mt-1 max-w-2xl">
+            A curated dynamic exhibition of candid landscapes, scenic views, and natural light moments fetched live from Google Drive.
+          </p>
+        </div>
+
+        <!-- Automated Action Features -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Frame Customizer Selector -->
+          <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1">
+            <span class="text-xs text-slate-400 px-2.5 font-medium hidden sm:inline"><i class="fa-solid fa-crop-simple mr-1"></i> Frame:</span>
+            <button onclick="setFrameStyle('gallery')" class="frame-style-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-300 hover:text-white transition active-style" data-style="gallery">Mat</button>
+            <button onclick="setFrameStyle('walnut')" class="frame-style-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 hover:text-white transition" data-style="walnut">Walnut</button>
+            <button onclick="setFrameStyle('polaroid')" class="frame-style-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 hover:text-white transition" data-style="polaroid">Polaroid</button>
+            <button onclick="setFrameStyle('charcoal')" class="frame-style-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 hover:text-white transition" data-style="charcoal">Slate</button>
+            <button onclick="setFrameStyle('glass')" class="frame-style-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 hover:text-white transition" data-style="glass">Glass</button>
+          </div>
+
+          <!-- Shuffle / Auto Frame Style Button -->
+          <button onclick="autoRandomizeFrames()" title="Auto Randomize Styles" class="px-3 py-2 bg-slate-900 border border-slate-800 text-amber-400 hover:bg-slate-800 rounded-xl text-xs font-medium flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-shuffle"></i>
+            <span class="hidden sm:inline">Auto Style</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Categories & Search Bar -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        
+        <!-- Category Badges -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-none" id="category-filters">
+          <button onclick="filterCategory('all')" class="cat-btn bg-amber-500 text-slate-950 font-medium px-4 py-1.5 rounded-full text-xs shrink-0 transition" data-cat="all">All Frames</button>
+          <button onclick="filterCategory('landscape')" class="cat-btn bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium px-4 py-1.5 rounded-full text-xs shrink-0 border border-slate-800 transition" data-cat="landscape">Landscapes</button>
+          <button onclick="filterCategory('scenic')" class="cat-btn bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium px-4 py-1.5 rounded-full text-xs shrink-0 border border-slate-800 transition" data-cat="scenic">Scenic Horizons</button>
+          <button onclick="filterCategory('sunset')" class="cat-btn bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium px-4 py-1.5 rounded-full text-xs shrink-0 border border-slate-800 transition" data-cat="sunset">Golden Hour</button>
+          <button onclick="filterCategory('candid')" class="cat-btn bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium px-4 py-1.5 rounded-full text-xs shrink-0 border border-slate-800 transition" data-cat="candid">Candid Nature</button>
+          <button onclick="filterCategory('favorites')" class="cat-btn bg-slate-900 hover:bg-slate-800 text-amber-400 font-medium px-4 py-1.5 rounded-full text-xs shrink-0 border border-slate-800 transition" data-cat="favorites"><i class="fa-solid fa-heart mr-1"></i> Favorites</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative min-w-[220px]">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Search photos or tags..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500/50 transition">
+        </div>
+      </div>
+    </section>
+
+    <!-- Photo Grid Gallery -->
+    <div id="gallery-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Skeleton Loaders (replaced on fetch) -->
+      <div class="skeleton-card h-80 rounded-2xl skeleton-loading border border-slate-800"></div>
+      <div class="skeleton-card h-96 rounded-2xl skeleton-loading border border-slate-800"></div>
+      <div class="skeleton-card h-80 rounded-2xl skeleton-loading border border-slate-800"></div>
+      <div class="skeleton-card h-96 rounded-2xl skeleton-loading border border-slate-800"></div>
+      <div class="skeleton-card h-80 rounded-2xl skeleton-loading border border-slate-800"></div>
+      <div class="skeleton-card h-96 rounded-2xl skeleton-loading border border-slate-800"></div>
+    </div>
+
+    <!-- Empty State Notice -->
+    <div id="empty-state" class="hidden text-center py-20 bg-slate-900/40 rounded-3xl border border-slate-800/80 my-8">
+      <i class="fa-solid fa-images text-4xl text-slate-600 mb-3"></i>
+      <h3 class="text-lg font-medium text-slate-300">No frames match your search</h3>
+      <p class="text-sm text-slate-500 mt-1">Try resetting filters or searching for another keyword.</p>
+      <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-amber-500 text-slate-950 rounded-xl text-xs font-semibold hover:bg-amber-400 transition">Reset All Filters</button>
+    </div>
+
+  </main>
+
+  <!-- LIGHTBOX / ZOOM MODAL -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl hidden flex flex-col justify-between transition-all duration-300">
+    
+    <!-- Lightbox Header -->
+    <div class="p-4 sm:p-6 flex items-center justify-between border-b border-slate-800/60 z-10">
+      <div class="flex items-center space-x-3">
+        <span id="lb-index" class="text-xs font-mono text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20">0 / 0</span>
+        <h3 id="lb-title" class="font-serif text-lg font-medium text-slate-200 truncate max-w-md">Photo Details</h3>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button onclick="favoriteActivePhoto()" id="lb-fav-btn" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-amber-400 transition">
+          <i class="fa-regular fa-heart text-base"></i>
+        </button>
+        <button onclick="downloadActivePhoto()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-emerald-400 transition" title="Open High-Res Link">
+          <i class="fa-solid fa-arrow-up-right-from-square text-base"></i>
+        </button>
+        <button onclick="closeLightbox()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-rose-400 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Lightbox Main Stage -->
+    <div class="relative flex-1 flex items-center justify-center p-4 sm:p-8 overflow-hidden">
+      <!-- Nav Previous -->
+      <button onclick="prevPhoto()" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3.5 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-200 hover:text-amber-400 hover:bg-slate-900 transition">
+        <i class="fa-solid fa-chevron-left text-lg"></i>
+      </button>
+
+      <!-- Image Display Frame -->
+      <div id="lb-frame-wrapper" class="relative max-max-h-[75vh] transition-all duration-500 max-w-5xl">
+        <img id="lb-image" src="" alt="" class="max-h-[72vh] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-300">
+      </div>
+
+      <!-- Nav Next -->
+      <button onclick="nextPhoto()" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3.5 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-200 hover:text-amber-400 hover:bg-slate-900 transition">
+        <i class="fa-solid fa-chevron-right text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Lightbox Footer Meta Info -->
+    <div class="p-4 sm:p-6 border-t border-slate-800/60 bg-slate-950/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      <div class="flex items-center space-x-4">
+        <span><i class="fa-solid fa-camera mr-1 text-amber-400"></i> AJ Candid Frames</span>
+        <span><i class="fa-solid fa-calendar-days mr-1 text-emerald-400"></i> <span id="lb-date">Recently Captured</span></span>
+        <span id="lb-tag" class="capitalize bg-slate-900 px-2.5 py-1 rounded-md text-slate-300 border border-slate-800">Scenic</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="text-slate-500">Keyboard shortcuts: ← Prev | → Next | ESC Close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOOGLE DRIVE API SETTINGS MODAL -->
+  <div id="drive-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center space-x-3">
+          <i class="fa-brands fa-google-drive text-2xl text-emerald-400"></i>
+          <div>
+            <h3 class="font-serif text-lg font-bold text-slate-100">Drive Integration</h3>
+            <p class="text-xs text-slate-400">Live API Settings & Status</p>
+          </div>
+        </div>
+        <button onclick="toggleDriveModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">Folder ID</label>
+          <input type="text" id="input-folder-id" value="131G2OujXv2Hlkp9TOCwqqnwyzScutNCW" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-200 focus:border-emerald-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">API Key</label>
+          <input type="text" id="input-api-key" value="AIzaSyA_mA45WVRAZ7DReNhRc1v2rHvdvK0KdpM" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-200 focus:border-emerald-500 outline-none">
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs text-slate-400 space-y-1">
+          <div class="flex items-center justify-between text-slate-300">
+            <span>Status:</span>
+            <span id="modal-status-badge" class="text-emerald-400 font-medium">Ready</span>
+          </div>
+          <p id="modal-status-desc" class="text-[11px] text-slate-500">Photos automatically fetch on load from your Google Drive public API.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-3 pt-2">
+        <button onclick="toggleDriveModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition">Cancel</button>
+        <button onclick="saveDriveSettings()" class="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-rotate mr-1"></i> Sync & Fetch
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. INITIAL CONFIGURATION & FALLBACK DATA
+       ========================================================================== */
+    // Default parameters provided by user
+    let driveConfig = {
+      apiKey: "AIzaSyA_mA45WVRAZ7DReNhRc1v2rHvdvK0KdpM",
+      folderId: "131G2OujXv2Hlkp9TOCwqqnwyzScutNCW"
+    };
+
+    // Backup high-res nature dataset if Drive API fails or key is origin-restricted
+    const fallbackPhotos = [
+      {
+        id: "fb_1",
+        name: "Emerald Mountain Ridge.jpg",
+        src: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        tag: "landscape",
+        date: "2026-08-14",
+        color: "#234038"
+      },
+      {
+        id: "fb_2",
+        name: "Misty Pine Forest Morning.jpg",
+        src: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80",
+        tag: "candid",
+        date: "2026-09-02",
+        color: "#182c23"
+      },
+      {
+        id: "fb_3",
+        name: "Golden Hour Ocean Cliff.jpg",
+        src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+        tag: "sunset",
+        date: "2026-09-18",
+        color: "#4d321d"
+      },
+      {
+        id: "fb_4",
+        name: "Solitary Alpine Lake Reflect.jpg",
+        src: "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&q=80",
+        tag: "scenic",
+        date: "2026-09-29",
+        color: "#1a2e38"
+      },
+      {
+        id: "fb_5",
+        name: "Autumn Forest Path Canopy.jpg",
+        src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80",
+        tag: "landscape",
+        date: "2026-10-01",
+        color: "#3a2517"
+      },
+      {
+        id: "fb_6",
+        name: "Wild River Cascade Stream.jpg",
+        src: "https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=1200&q=80",
+        tag: "candid",
+        date: "2026-10-05",
+        color: "#1d382e"
+      }
+    ];
+
+    // App state
+    let photos = [];
+    let currentCategory = 'all';
+    let currentFrameStyle = 'gallery'; // gallery, walnut, charcoal, polaroid, glass
+    let favorites = JSON.parse(localStorage.getItem('aj_favorites') || '[]');
+    let activePhotoIndex = 0;
+    let slideshowInterval = null;
+    let isSlideshowActive = false;
+    let audioCtx = null;
+    let isAudioPlaying = false;
+
+    /* ==========================================================================
+       2. GOOGLE DRIVE API FETCH ENGINE
+       ========================================================================== */
+    async function fetchPhotosFromDrive() {
+      const { apiKey, folderId } = driveConfig;
+      showSkeletonLoaders();
+
+      // Query Google Drive V3 API for images in the target folder
+      const query = encodeURIComponent(`'${folderId}' in parents and trashed = false and mimeType contains 'image/'`);
+      const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,mimeType,createdTime,thumbnailLink,webContentLink)&key=${apiKey}`;
+
+      try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`Google Drive API returned status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.files && data.files.length > 0) {
+          photos = data.files.map((file, index) => {
+            // Direct viewer URL for Google Drive files
+            const highResUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+            const tags = ['landscape', 'scenic', 'sunset', 'candid'];
+            const assignedTag = tags[index % tags.length];
+
+            return {
+              id: file.id,
+              name: file.name.replace(/\.[^/.]+$/, ""), // remove file extension
+              src: highResUrl,
+              tag: assignedTag,
+              date: file.createdTime ? file.createdTime.split('T')[0] : '2026-10-09',
+              color: '#1e293b'
+            };
+          });
+
+          updateDriveStatusUI(true, `Loaded ${photos.length} photos from Drive`);
+        } else {
+          console.warn("Drive folder is empty or private. Using high-resolution fallback gallery.");
+          photos = fallbackPhotos;
+          updateDriveStatusUI(false, "No public Drive photos found (showing fallback scenic frames)");
+        }
+      } catch (err) {
+        console.warn("Drive API call encountered restriction or CORS limit. Displaying fallback scenic collection:", err);
+        photos = fallbackPhotos;
+        updateDriveStatusUI(false, "Drive API fallback active (using curated sample frames)");
+      }
+
+      renderGallery();
+    }
+
+    function updateDriveStatusUI(isSuccess, message) {
+      const statusText = document.getElementById('drive-status-text');
+      const modalBadge = document.getElementById('modal-status-badge');
+      const modalDesc = document.getElementById('modal-status-desc');
+
+      if (statusText) statusText.innerText = isSuccess ? "Drive Connected" : "Sample Mode";
+      if (modalBadge) {
+        modalBadge.innerText = isSuccess ? "Connected" : "Fallback Active";
+        modalBadge.className = isSuccess ? "text-emerald-400 font-medium" : "text-amber-400 font-medium";
+      }
+      if (modalDesc) modalDesc.innerText = message;
+    }
+
+    /* ==========================================================================
+       3. GALLERY RENDERING & STYLISH FRAMES
+       ========================================================================== */
+    function renderGallery() {
+      const container = document.getElementById('gallery-container');
+      const emptyState = document.getElementById('empty-state');
+      const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+
+      // Filter photos by category & search term
+      let filtered = photos.filter(photo => {
+        const matchesCategory = (currentCategory === 'all') ||
+          (currentCategory === 'favorites' ? favorites.includes(photo.id) : photo.tag === currentCategory);
+        const matchesSearch = photo.name.toLowerCase().includes(searchTerm) || photo.tag.toLowerCase().includes(searchTerm);
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      container.innerHTML = '';
+
+      filtered.forEach((photo, idx) => {
+        const isFav = favorites.includes(photo.id);
+        const polaroidAngle = (idx % 2 === 0 ? 1.5 : -1.5) + (idx % 3 * 0.5);
+        
+        // Build card HTML with selected frame wrapper
+        const card = document.createElement('div');
+        card.className = "group relative transition-all duration-500 cursor-pointer animate-float";
+        card.style.animationDelay = `${(idx % 5) * 0.2}s`;
+
+        let frameCss = '';
+        if (currentFrameStyle === 'gallery') frameCss = 'frame-gallery';
+        else if (currentFrameStyle === 'walnut') frameCss = 'frame-walnut';
+        else if (currentFrameStyle === 'charcoal') frameCss = 'frame-charcoal';
+        else if (currentFrameStyle === 'polaroid') frameCss = 'frame-polaroid';
+        else if (currentFrameStyle === 'glass') frameCss = 'frame-glass';
+
+        card.innerHTML = `
+          <div class="${frameCss} overflow-hidden" style="--polaroid-angle: ${polaroidAngle}deg;">
+            
+            <!-- Image Container -->
+            <div class="relative overflow-hidden bg-slate-900 rounded-sm aspect-[4/3]" onclick="openLightbox(${photos.indexOf(photo)})">
+              <img src="${photo.src}" alt="${photo.name}" 
+                   loading="lazy" 
+                   onerror="this.src='https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+              
+              <!-- Hover Overlay Glow -->
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                <span class="text-xs font-medium text-amber-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-expand text-xs"></i> Inspect Frame
+                </span>
+              </div>
+            </div>
+
+            <!-- Frame Caption Area -->
+            <div class="mt-3 flex items-center justify-between">
+              <div>
+                <h4 class="${currentFrameStyle === 'polaroid' ? 'font-handwriting text-xl text-slate-800' : 'font-serif text-sm text-slate-200'} font-semibold truncate max-w-[200px]">
+                  ${photo.name}
+                </h4>
+                <p class="text-[10px] text-slate-400 capitalize tracking-wider flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span> ${photo.tag}
+                </p>
+              </div>
+
+              <!-- Quick Action Buttons -->
+              <div class="flex items-center space-x-1">
+                <button onclick="event.stopPropagation(); toggleFavorite('${photo.id}')" class="p-2 text-slate-400 hover:text-amber-400 transition">
+                  <i class="${isFav ? 'fa-solid text-amber-400' : 'fa-regular'} fa-heart text-sm"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function showSkeletonLoaders() {
+      const container = document.getElementById('gallery-container');
+      if (!container) return;
+      container.innerHTML = Array(6).fill(0).map(() => 
+        `<div class="h-80 rounded-2xl skeleton-loading border border-slate-800"></div>`
+      ).join('');
+    }
+
+    /* ==========================================================================
+       4. INTERACTIVE CONTROLS & FILTERING
+       ========================================================================== */
+    function filterCategory(category) {
+      currentCategory = category;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        if (btn.dataset.cat === category) {
+          btn.className = "cat-btn bg-amber-500 text-slate-950 font-semibold px-4 py-1.5 rounded-full text-xs shrink-0 transition shadow-md shadow-amber-500/20";
+        } else {
+          btn.className = "cat-btn bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium px-4 py-1.5 rounded-full text-xs shrink-0 border border-slate-800 transition";
+        }
+      });
+      renderGallery();
+    }
+
+    function setFrameStyle(style) {
+      currentFrameStyle = style;
+      document.querySelectorAll('.frame-style-btn').forEach(btn => {
+        if (btn.dataset.style === style) {
+          btn.classList.add('bg-amber-500', 'text-slate-950', 'font-semibold');
+          btn.classList.remove('text-slate-400');
+        } else {
+          btn.classList.remove('bg-amber-500', 'text-slate-950', 'font-semibold');
+          btn.classList.add('text-slate-400');
+        }
+      });
+      renderGallery();
+    }
+
+    function autoRandomizeFrames() {
+      const styles = ['gallery', 'walnut', 'charcoal', 'polaroid', 'glass'];
+      const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+      setFrameStyle(randomStyle);
+      
+      // Flash ambient backdrop accent
+      const backdrop = document.getElementById('ambient-backdrop');
+      const colors = ['from-emerald-900', 'from-amber-900', 'from-teal-900', 'from-indigo-900'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      backdrop.className = `fixed inset-0 pointer-events-none opacity-40 transition-all duration-1000 z-0 bg-gradient-to-br ${randomColor} via-slate-950 to-slate-950`;
+    }
+
+    function handleSearch() {
+      renderGallery();
+    }
+
+    function resetFilters() {
+      document.getElementById('search-input').value = '';
+      filterCategory('all');
+    }
+
+    function toggleFavorite(id) {
+      if (favorites.includes(id)) {
+        favorites = favorites.filter(fav => fav !== id);
+      } else {
+        favorites.push(id);
+      }
+      localStorage.setItem('aj_favorites', JSON.stringify(favorites));
+      renderGallery();
+      updateLightboxFavBtn();
+    }
+
+    /* ==========================================================================
+       5. LIGHTBOX & ZEN AUTOMATION MODE
+       ========================================================================== */
+    function openLightbox(index) {
+      if (!photos[index]) return;
+      activePhotoIndex = index;
+      const photo = photos[index];
+
+      document.getElementById('lb-image').src = photo.src;
+      document.getElementById('lb-title').innerText = photo.name;
+      document.getElementById('lb-index').innerText = `${index + 1} / ${photos.length}`;
+      document.getElementById('lb-date').innerText = photo.date || 'Recent';
+      document.getElementById('lb-tag').innerText = photo.tag;
+
+      updateLightboxFavBtn();
+      document.getElementById('lightbox-modal').classList.remove('hidden');
+
+      // Set dynamic ambient color tint
+      updateAmbientBackdrop(photo);
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox-modal').classList.add('hidden');
+    }
+
+    function nextPhoto() {
+      activePhotoIndex = (activePhotoIndex + 1) % photos.length;
+      openLightbox(activePhotoIndex);
+    }
+
+    function prevPhoto() {
+      activePhotoIndex = (activePhotoIndex - 1 + photos.length) % photos.length;
+      openLightbox(activePhotoIndex);
+    }
+
+    function updateLightboxFavBtn() {
+      const activePhoto = photos[activePhotoIndex];
+      if (!activePhoto) return;
+      const favBtn = document.getElementById('lb-fav-btn');
+      const isFav = favorites.includes(activePhoto.id);
+      favBtn.innerHTML = `<i class="${isFav ? 'fa-solid text-amber-400' : 'fa-regular'} fa-heart text-base"></i>`;
+    }
+
+    function favoriteActivePhoto() {
+      if (photos[activePhotoIndex]) {
+        toggleFavorite(photos[activePhotoIndex].id);
+      }
+    }
+
+    function downloadActivePhoto() {
+      if (photos[activePhotoIndex]) {
+        window.open(photos[activePhotoIndex].src, '_blank');
+      }
+    }
+
+    function toggleSlideshowMode() {
+      isSlideshowActive = !isSlideshowActive;
+      const btn = document.getElementById('slideshow-btn');
+      const icon = document.getElementById('slideshow-icon');
+
+      if (isSlideshowActive) {
+        btn.classList.replace('from-amber-500', 'from-emerald-500');
+        btn.classList.replace('to-amber-600', 'to-emerald-600');
+        icon.className = "fa-solid fa-pause";
+        openLightbox(0);
+        
+        slideshowInterval = setInterval(() => {
+          nextPhoto();
+        }, 4000);
+      } else {
+        btn.classList.replace('from-emerald-500', 'from-amber-500');
+        btn.classList.replace('to-emerald-600', 'to-amber-600');
+        icon.className = "fa-solid fa-play";
+        clearInterval(slideshowInterval);
+      }
+    }
+
+    function updateAmbientBackdrop(photo) {
+      const backdrop = document.getElementById('ambient-backdrop');
+      const gradientGlows = [
+        'from-emerald-900/60 via-slate-950 to-slate-950',
+        'from-amber-900/60 via-slate-950 to-slate-950',
+        'from-teal-900/60 via-slate-950 to-slate-950',
+        'from-slate-800/60 via-slate-950 to-slate-950'
+      ];
+      const glow = gradientGlows[activePhotoIndex % gradientGlows.length];
+      backdrop.className = `fixed inset-0 pointer-events-none opacity-40 transition-all duration-1000 z-0 bg-gradient-to-br ${glow}`;
+    }
+
+    /* ==========================================================================
+       6. AMBIENT NATURE SOUNDSCAPE GENERATOR (Web Audio API)
+       ========================================================================== */
+    function toggleAmbientAudio() {
+      const icon = document.getElementById('audio-icon');
+
+      if (!isAudioPlaying) {
+        startAmbientSound();
+        isAudioPlaying = true;
+        icon.className = "fa-solid fa-volume-high text-amber-400 animate-pulse";
+      } else {
+        stopAmbientSound();
+        isAudioPlaying = false;
+        icon.className = "fa-solid fa-volume-xmark text-slate-300";
+      }
+    }
+
+    function startAmbientSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+
+        // Generates continuous soft pink noise breeze
+        const bufferSize = audioCtx.sampleRate * 2;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.0168980;
+          output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+          output[i] *= 0.015; // Soft ambient volume
+          b6 = white * 0.115926;
+        }
+
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        // Filter for gentle wind/ocean rumble
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+
+        whiteNoise.connect(filter);
+        filter.connect(audioCtx.destination);
+        whiteNoise.start();
+
+        audioCtx.whiteNoiseNode = whiteNoise;
+      } catch (e) {
+        console.warn("Web Audio API not supported in this browser environment.", e);
+      }
+    }
+
+    function stopAmbientSound() {
+      if (audioCtx) {
+        if (audioCtx.whiteNoiseNode) audioCtx.whiteNoiseNode.stop();
+        audioCtx.close();
+        audioCtx = null;
+      }
+    }
+
+    /* ==========================================================================
+       7. DRIVE MODAL & KEYBOARD LISTENERS
+       ========================================================================== */
+    function toggleDriveModal() {
+      const modal = document.getElementById('drive-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    function saveDriveSettings() {
+      const keyInput = document.getElementById('input-api-key').value.trim();
+      const folderInput = document.getElementById('input-folder-id').value.trim();
+
+      if (keyInput) driveConfig.apiKey = keyInput;
+      if (folderInput) driveConfig.folderId = folderInput;
+
+      toggleDriveModal();
+      fetchPhotosFromDrive();
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const lightbox = document.getElementById('lightbox-modal');
+      if (!lightbox.classList.contains('hidden')) {
+        if (e.key === 'ArrowRight') nextPhoto();
+        if (e.key === 'ArrowLeft') prevPhoto();
+        if (e.key === 'Escape') closeLightbox();
+      }
+    });
+
+    /* ==========================================================================
+       8. INITIALIZATION ON WINDOW LOAD
+       ========================================================================== */
+    window.onload = function() {
+      // Start initial Drive fetch
+      fetchPhotosFromDrive();
+    };
+  </script>
+</body>
+</html>
